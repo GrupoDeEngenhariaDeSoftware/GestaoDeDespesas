@@ -25,6 +25,7 @@ import matplotlib.pyplot as plt
 import io
 import base64
 
+
 # Páginas Gerais
 def home(request):
     return render(request, 'despesas/home.html')

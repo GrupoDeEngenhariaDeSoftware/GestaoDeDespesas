@@ -1,0 +1,10 @@
+{% extends "despesas/base.html" %}
+
+{% block content %}
+  <h2>Pagamento de Reembolso</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Confirmar Pagamento</button>
+  </form>
+{% endblock %}

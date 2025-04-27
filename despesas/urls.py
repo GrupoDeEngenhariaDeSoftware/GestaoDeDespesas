@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from django.contrib.auth.views import LogoutView
 
 app_name = 'despesas'
 
@@ -39,5 +40,6 @@ urlpatterns = [
     path('relatorios/novo/', views.relatorio_create, name='relatorio_create'),
     path('relatorios/<int:pk>/', views.relatorio_detail, name='relatorio_detail'),
     path('relatorios/gerar/', views.relatorio_gerar, name='relatorio_gerar'),
+    path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
     
 ]
