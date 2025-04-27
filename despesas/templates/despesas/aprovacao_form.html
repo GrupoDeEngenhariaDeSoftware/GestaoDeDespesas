@@ -1,0 +1,50 @@
+
+{% extends 'despesas/base.html' %}
+
+{% block title %}Avaliar Solicitação - Sistema de Gestão de Despesas{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'despesas:aprovacao_detail' solicitacao.codigo %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Avaliar Solicitação #{{ solicitacao.codigo }}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Decisão</label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" name="decisao" value="APROVADA" id="decisao_aprovada" required>
+                                <label class="form-check-label" for="decisao_aprovada">Aprovar</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" name="decisao" value="NEGADA" id="decisao_negada" required>
+                                <label class="form-check-label" for="decisao_negada">Negar</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="observacao" class="form-label">Observações</label>
+                        <textarea name="observacao" id="observacao" class="form-control" rows="4" placeholder="Adicione observações sobre sua decisão..."></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Confirmar Avaliação</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

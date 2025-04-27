@@ -1,0 +1,169 @@
+{% extends 'despesas/base.html' %}
+
+{% block title %}Despesa #{{ despesa.id }} - Sistema de Gestão de Despesas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Detalhes da Despesa</h1>
+    <a href="{% url 'despesas:despesa_list' %}" class="btn btn-outline-primary">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">Informações da Despesa</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Código:</strong></p>
+                        <p>{{ despesa.codigo }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Status:</strong></p>
+                        <p>
+                            <span class="badge 
+                                {% if despesa.status == 'RASCUNHO' %}bg-secondary
+                                {% elif despesa.status == 'ENVIADA' %}bg-warning
+                                {% elif despesa.status == 'APROVADA' %}bg-success
+                                {% elif despesa.status == 'NEGADA' %}bg-danger
+                                {% elif despesa.status == 'PAGA' %}bg-info{% endif %}">
+                                {{ despesa.get_status_display }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Categoria:</strong></p>
+                        <p>{{ despesa.categoria.nome }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Data da Despesa:</strong></p>
+                        <p>{{ despesa.data_despesa|date:"d/m/Y" }}</p>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Valor:</strong></p>
+                        <p class="text-primary fw-bold">R$ {{ despesa.valor|floatformat:2 }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Funcionário:</strong></p>
+                        <p>{{ despesa.funcionario.usuario.get_full_name }} ({{ despesa.funcionario.matricula }})</p>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <p class="mb-1"><strong>Descrição:</strong></p>
+                    <p>{{ despesa.descricao|linebreaks }}</p>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Data de Criação:</strong></p>
+                        <p>{{ despesa.data_criacao|date:"d/m/Y H:i" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Última Atualização:</strong></p>
+                        <p>{{ despesa.data_atualizacao|date:"d/m/Y H:i" }}</p>
+                    </div>
+                </div>
+                
+                {% if despesa.comprovante %}
+                <div class="mb-3">
+                    <p class="mb-1"><strong>Comprovante:</strong></p>
+                    <p>
+                        <a href="{{ despesa.comprovante.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-file-earmark-text"></i> Visualizar Comprovante
+                        </a>
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+            
+            {% if despesa.status == 'RASCUNHO' and despesa.funcionario == request.user.funcionario %}
+            <div class="card-footer">
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{% url 'despesas:despesa_update' despesa.codigo %}" class="btn btn-warning">
+                        <i class="bi bi-pencil"></i> Editar
+                    </a>
+                    <a href="{% url 'despesas:despesa_delete' despesa.codigo %}" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Excluir
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">Histórico de Solicitações</h5>
+            </div>
+            <div class="card-body">
+                {% if despesa.solicitacoes.exists %}
+                    <div class="list-group">
+                        {% for solicitacao in despesa.solicitacoes.all %}
+                        <a href="{% url 'despesas:reembolso_detail' solicitacao.codigo %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Solicitação #{{ solicitacao.id }}</h6>
+                                <small>{{ solicitacao.data_solicitacao|date:"d/m/Y" }}</small>
+                            </div>
+                            <p class="mb-1 small">Status: 
+                                <span class="badge 
+                                    {% if solicitacao.status == 'PENDENTE' %}bg-warning
+                                    {% elif solicitacao.status == 'APROVADA' %}bg-success
+                                    {% elif solicitacao.status == 'NEGADA' %}bg-danger
+                                    {% elif solicitacao.status == 'PAGA' %}bg-info{% endif %}">
+                                    {{ solicitacao.get_status_display }}
+                                </span>
+                            </p>
+                        </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center mb-0">Esta despesa ainda não foi incluída em nenhuma solicitação de reembolso.</p>
+                    
+                    {% if despesa.status == 'RASCUNHO' and despesa.funcionario == request.user.funcionario %}
+                    <div class="d-grid gap-2 mt-3">
+                        <a href="{% url 'despesas:reembolso_create' %}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Solicitar Reembolso
+                        </a>
+                    </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if despesa.solicitacoes.exists %}
+            {% for solicitacao in despesa.solicitacoes.all %}
+                {% if solicitacao.status == 'PAGA' and solicitacao.pagamento %}
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">Pagamento</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Data:</strong> {{ solicitacao.pagamento.data_pagamento|date:"d/m/Y" }}</p>
+                        <p><strong>Valor:</strong> R$ {{ solicitacao.pagamento.valor|floatformat:2 }}</p>
+                        <p><strong>Método:</strong> {{ solicitacao.pagamento.get_metodo_display }}</p>
+                        
+                        {% if solicitacao.pagamento.comprovante %}
+                        <a href="{{ solicitacao.pagamento.comprovante.url }}" target="_blank" class="btn btn-sm btn-outline-success">
+                            <i class="bi bi-file-earmark-text"></i> Comprovante de Pagamento
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

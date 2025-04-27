@@ -1,0 +1,235 @@
+{% extends 'despesas/base.html' %}
+
+{% block title %}Detalhes da Solicitação de Reembolso - Sistema de Gestão de Despesas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Solicitação de Reembolso</h1>
+    <a href="{% url 'despesas:reembolso_list' %}" class="btn btn-outline-primary">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">Detalhes da Solicitação</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Código:</strong></p>
+                        <p>{{ solicitacao.codigo }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Status:</strong></p>
+                        <p>
+                            <span class="badge 
+                                {% if solicitacao.status == 'PENDENTE' %}bg-warning
+                                {% elif solicitacao.status == 'APROVADA' %}bg-success
+                                {% elif solicitacao.status == 'NEGADA' %}bg-danger
+                                {% elif solicitacao.status == 'PAGA' %}bg-info{% endif %}">
+                                {{ solicitacao.get_status_display }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Funcionário:</strong></p>
+                        <p>{{ solicitacao.funcionario.usuario.get_full_name }} ({{ solicitacao.funcionario.matricula }})</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Departamento:</strong></p>
+                        <p>{{ solicitacao.funcionario.departamento.nome }}</p>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Data da Solicitação:</strong></p>
+                        <p>{{ solicitacao.data_solicitacao|date:"d/m/Y H:i" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Valor Total:</strong></p>
+                        <p class="text-primary fw-bold">R$ {{ solicitacao.valor_total|floatformat:2 }}</p>
+                    </div>
+                </div>
+                
+                {% if solicitacao.justificativa %}
+                <div class="mb-3">
+                    <p class="mb-1"><strong>Justificativa:</strong></p>
+                    <p>{{ solicitacao.justificativa|linebreaks }}</p>
+                </div>
+                {% endif %}
+                
+                {% if solicitacao.status != 'PENDENTE' %}
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Data de Aprovação/Negação:</strong></p>
+                        <p>{{ solicitacao.data_aprovacao|date:"d/m/Y H:i" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Responsável:</strong></p>
+                        <p>{{ solicitacao.aprovador.usuario.get_full_name }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">Despesas Incluídas</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Data</th>
+                                <th>Categoria</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for despesa in solicitacao.despesas.all %}
+                            <tr>
+                                <td>{{ despesa.id }}</td>
+                                <td>{{ despesa.data_despesa|date:"d/m/Y" }}</td>
+                                <td>{{ despesa.categoria.nome }}</td>
+                                <td>R$ {{ despesa.valor|floatformat:2 }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if despesa.status == 'RASCUNHO' %}bg-secondary
+                                        {% elif despesa.status == 'ENVIADA' %}bg-warning
+                                        {% elif despesa.status == 'APROVADA' %}bg-success
+                                        {% elif despesa.status == 'NEGADA' %}bg-danger
+                                        {% elif despesa.status == 'PAGA' %}bg-info{% endif %}">
+                                        {{ despesa.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'despesas:despesa_detail' despesa.codigo %}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-eye"></i> Ver
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-primary">
+                                <th colspan="3" class="text-end">Valor Total:</th>
+                                <th>R$ {{ solicitacao.valor_total|floatformat:2 }}</th>
+                                <th colspan="2"></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">Status da Solicitação</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item {% if solicitacao.status != 'PENDENTE' %}list-group-item-light{% else %}list-group-item-warning{% endif %}">
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <div>
+                                <i class="bi {% if solicitacao.status != 'PENDENTE' %}bi-check-circle-fill{% else %}bi-arrow-right-circle-fill{% endif %} me-2"></i>
+                                <strong>Aguardando Aprovação</strong>
+                            </div>
+                            <small>{{ solicitacao.data_solicitacao|date:"d/m/Y" }}</small>
+                        </div>
+                    </li>
+                    
+                    <li class="list-group-item {% if solicitacao.status == 'APROVADA' or solicitacao.status == 'PAGA' %}list-group-item-success{% elif solicitacao.status == 'NEGADA' %}list-group-item-danger{% else %}list-group-item-light{% endif %}">
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <div>
+                                {% if solicitacao.status == 'PENDENTE' %}
+                                <i class="bi bi-circle me-2"></i>
+                                <span class="text-muted">Aprovação do Gerente</span>
+                                {% elif solicitacao.status == 'APROVADA' or solicitacao.status == 'PAGA' %}
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                                <strong>Aprovada</strong>
+                                {% elif solicitacao.status == 'NEGADA' %}
+                                <i class="bi bi-x-circle-fill me-2"></i>
+                                <strong>Negada</strong>
+                                {% endif %}
+                            </div>
+                            {% if solicitacao.status != 'PENDENTE' %}
+                            <small>{{ solicitacao.data_aprovacao|date:"d/m/Y" }}</small>
+                            {% endif %}
+                        </div>
+                        {% if solicitacao.status != 'PENDENTE' and solicitacao.aprovador %}
+                        <div class="ps-4 pt-2">
+                            <small>Aprovador: {{ solicitacao.aprovador.usuario.get_full_name }}</small>
+                        </div>
+                        {% endif %}
+                    </li>
+                    
+                    <li class="list-group-item {% if solicitacao.status == 'PAGA' %}list-group-item-info{% else %}list-group-item-light{% endif %}">
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <div>
+                                {% if solicitacao.status == 'PAGA' %}
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                                <strong>Reembolso Realizado</strong>
+                                {% else %}
+                                <i class="bi bi-circle me-2"></i>
+                                <span class="text-muted">Pagamento</span>
+                                {% endif %}
+                            </div>
+                            {% if solicitacao.status == 'PAGA' and pagamento %}
+                            <small>{{ pagamento.data_pagamento|date:"d/m/Y" }}</small>
+                            {% endif %}
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        {% if pagamento %}
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0">Informações do Pagamento</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Data do Pagamento:</strong> {{ pagamento.data_pagamento|date:"d/m/Y H:i" }}</p>
+                <p><strong>Valor:</strong> R$ {{ pagamento.valor|floatformat:2 }}</p>
+                <p><strong>Método:</strong> {{ pagamento.get_metodo_display }}</p>
+                <p><strong>Responsável:</strong> {{ pagamento.responsavel.usuario.get_full_name }}</p>
+                
+                {% if pagamento.observacoes %}
+                <p><strong>Observações:</strong> {{ pagamento.observacoes|linebreaks }}</p>
+                {% endif %}
+                
+                {% if pagamento.comprovante %}
+                <a href="{{ pagamento.comprovante.url }}" target="_blank" class="btn btn-sm btn-outline-success mt-2">
+                    <i class="bi bi-file-earmark-text"></i> Comprovante de Pagamento
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% elif solicitacao.status == 'APROVADA' and request.user.funcionario.is_financeiro %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-grid">
+                    <a href="{% url 'despesas:pagamento_create' solicitacao.codigo %}" class="btn btn-success">
+                        <i class="bi bi-cash-coin"></i> Registrar Pagamento
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

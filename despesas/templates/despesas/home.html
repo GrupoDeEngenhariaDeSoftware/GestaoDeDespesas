@@ -1,0 +1,55 @@
+{% extends 'despesas/base.html' %}
+
+{% block title %}Sistema de Gestão de Despesas - Início{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <h1 class="mb-4">Sistema de Gestão de Despesas</h1>
+            <p class="lead mb-5">Simplifique a gestão de despesas da sua empresa com nosso sistema completo de registro, aprovação e reembolso de despesas.</p>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-receipt fs-1 text-primary mb-3"></i>
+                    <h3>Registro de Despesas</h3>
+                    <p>Funcionários podem registrar facilmente suas despesas, anexar comprovantes e solicitar reembolsos.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-check2-circle fs-1 text-success mb-3"></i>
+                    <h3>Aprovação de Gerentes</h3>
+                    <p>Gerentes podem revisar e aprovar ou negar solicitações de reembolso de sua equipe.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-bar-chart fs-1 text-warning mb-3"></i>
+                    <h3>Relatórios Financeiros</h3>
+                    <p>Equipe financeira pode gerar relatórios detalhados de todas as despesas e reembolsos.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-12 text-center">
+            {% if user.is_authenticated %}
+                <a href="{% url 'despesas:dashboard' %}" class="btn btn-primary btn-lg">Acessar Dashboard</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-primary btn-lg me-3">Entrar no Sistema</a>
+                <a href="{% url 'despesas:register' %}" class="btn btn-outline-primary btn-lg">Criar Conta</a>
+            {% endif %}
+        </div>
+    </div>
+    
+{% endblock %}

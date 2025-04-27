@@ -1,0 +1,94 @@
+
+{% extends 'despesas/base.html' %}
+
+{% block title %}Pagamentos - Sistema de Gestão de Despesas{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Gestão de Pagamentos</h1>
+
+<!-- Solicitações Pendentes -->
+<div class="card mb-4">
+    <div class="card-header bg-warning">
+        <h5 class="card-title mb-0">Solicitações Pendentes de Pagamento</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Data Aprovação</th>
+                        <th>Funcionário</th>
+                        <th>Departamento</th>
+                        <th>Valor Total</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for solicitacao in pendentes_page_obj %}
+                    <tr>
+                        <td>{{ solicitacao.data_aprovacao|date:"d/m/Y H:i" }}</td>
+                        <td>{{ solicitacao.funcionario }}</td>
+                        <td>{{ solicitacao.funcionario.departamento }}</td>
+                        <td>R$ {{ solicitacao.valor_total|floatformat:2 }}</td>
+                        <td>
+                            <a href="{% url 'despesas:pagamento_create' solicitacao.codigo %}" class="btn btn-primary btn-sm">
+                                Realizar Pagamento
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">Nenhuma solicitação pendente de pagamento.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% include "despesas/pagination.html" with page_obj=pendentes_page_obj param_name="page_pendentes" %}
+    </div>
+</div>
+
+<!-- Pagamentos Realizados -->
+<div class="card">
+    <div class="card-header bg-success text-white">
+        <h5 class="card-title mb-0">Pagamentos Realizados</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Data Pagamento</th>
+                        <th>Funcionário</th>
+                        <th>Valor</th>
+                        <th>Método</th>
+                        <th>Responsável</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pagamento in realizados_page_obj %}
+                    <tr>
+                        <td>{{ pagamento.data_pagamento|date:"d/m/Y H:i" }}</td>
+                        <td>{{ pagamento.solicitacao.funcionario }}</td>
+                        <td>R$ {{ pagamento.valor|floatformat:2 }}</td>
+                        <td>{{ pagamento.get_metodo_display }}</td>
+                        <td>{{ pagamento.responsavel }}</td>
+                        <td>
+                            <a href="{% url 'despesas:pagamento_detail' pagamento.id %}" class="btn btn-info btn-sm">
+                                Detalhes
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">Nenhum pagamento realizado.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% include "despesas/pagination.html" with page_obj=realizados_page_obj param_name="page_realizados" %}
+    </div>
+</div>
+{% endblock %}

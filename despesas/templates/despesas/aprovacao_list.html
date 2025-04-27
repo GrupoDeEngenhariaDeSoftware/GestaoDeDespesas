@@ -1,0 +1,99 @@
+
+{% extends 'despesas/base.html' %}
+
+{% block title %}Aprovações Pendentes - Sistema de Gestão de Despesas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Aprovações Pendentes</h1>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-header bg-light">
+        <h5 class="card-title mb-0">Filtros</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="funcionario" class="form-label">Funcionário</label>
+                <select name="funcionario" id="funcionario" class="form-select">
+                    <option value="">Todos</option>
+                    {% for func in funcionarios %}
+                    <option value="{{ func.id }}" {% if request.GET.funcionario == func.id|stringformat:"s" %}selected{% endif %}>
+                        {{ func.usuario.get_full_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-4">
+                <label for="data_inicio" class="form-label">Data Início</label>
+                <input type="date" name="data_inicio" id="data_inicio" class="form-control"
+                       value="{{ request.GET.data_inicio|default:'' }}">
+            </div>
+            
+            <div class="col-md-4">
+                <label for="data_fim" class="form-label">Data Fim</label>
+                <input type="date" name="data_fim" id="data_fim" class="form-control"
+                       value="{{ request.GET.data_fim|default:'' }}">
+            </div>
+            
+            <div class="col-12 d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary me-2">Filtrar</button>
+                <a href="{% url 'despesas:aprovacao_list' %}" class="btn btn-secondary">Limpar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lista de Solicitações -->
+<div class="card">
+    <div class="card-header bg-light">
+        <h5 class="card-title mb-0">Solicitações Pendentes</h5>
+    </div>
+    <div class="card-body">
+        {% if page_obj %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Funcionário</th>
+                        <th>Data Solicitação</th>
+                        <th>Valor Total</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for solicitacao in page_obj %}
+                    <tr>
+                        <td>{{ solicitacao.codigo }}</td>
+                        <td>{{ solicitacao.funcionario.usuario.get_full_name }}</td>
+                        <td>{{ solicitacao.data_solicitacao|date:"d/m/Y H:i" }}</td>
+                        <td>R$ {{ solicitacao.valor_total|floatformat:2 }}</td>
+                        <td>
+                            <span class="badge bg-warning">{{ solicitacao.get_status_display }}</span>
+                        </td>
+                        <td>
+                            <a href="{% url 'despesas:aprovacao_detail' solicitacao.codigo %}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-eye"></i> Avaliar
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Paginação -->
+        {% include 'despesas/pagination.html' %}
+        {% else %}
+        <div class="text-center py-4">
+            <p class="text-muted">Nenhuma solicitação pendente de aprovação.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

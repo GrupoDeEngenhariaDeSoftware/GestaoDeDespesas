@@ -1,0 +1,84 @@
+
+{% extends 'despesas/base.html' %}
+
+{% block title %}Detalhes da Aprovação - Sistema de Gestão de Despesas{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'despesas:aprovacao_list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Solicitação de Reembolso #{{ solicitacao.codigo }}</h5>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h6>Informações da Solicitação</h6>
+                <ul class="list-unstyled">
+                    <li><strong>Funcionário:</strong> {{ solicitacao.funcionario }}</li>
+                    <li><strong>Departamento:</strong> {{ solicitacao.funcionario.departamento }}</li>
+                    <li><strong>Data:</strong> {{ solicitacao.data_solicitacao|date:"d/m/Y H:i" }}</li>
+                    <li><strong>Valor Total:</strong> R$ {{ solicitacao.valor_total|floatformat:2 }}</li>
+                    <li><strong>Status:</strong> {{ solicitacao.get_status_display }}</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6>Justificativa do Funcionário</h6>
+                <p class="border rounded p-3 bg-light">{{ solicitacao.justificativa|default:"Nenhuma justificativa fornecida." }}</p>
+            </div>
+        </div>
+
+        <h6>Despesas Incluídas</h6>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Categoria</th>
+                        <th>Descrição</th>
+                        <th>Valor</th>
+                        <th>Comprovante</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for despesa in solicitacao.despesas.all %}
+                    <tr>
+                        <td>{{ despesa.data_despesa|date:"d/m/Y" }}</td>
+                        <td>{{ despesa.categoria }}</td>
+                        <td>{{ despesa.descricao }}</td>
+                        <td>R$ {{ despesa.valor|floatformat:2 }}</td>
+                        <td>
+                            {% if despesa.comprovante %}
+                            <a href="{{ despesa.comprovante.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-file-earmark-text"></i> Ver
+                            </a>
+                            {% else %}
+                            <span class="text-muted">Não anexado</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                        <td colspan="2"><strong>R$ {{ solicitacao.valor_total|floatformat:2 }}</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        {% if solicitacao.status == 'PENDENTE' %}
+        <div class="mt-4">
+            <a href="{% url 'despesas:aprovacao_update' solicitacao.codigo %}" class="btn btn-primary">
+                Avaliar Solicitação
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

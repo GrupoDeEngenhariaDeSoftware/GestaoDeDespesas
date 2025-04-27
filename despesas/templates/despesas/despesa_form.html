@@ -1,0 +1,110 @@
+{% extends 'despesas/base.html' %}
+
+{% block title %}{{ titulo }} - Sistema de Gestão de Despesas{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">{{ titulo }}</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.categoria.id_for_label }}" class="form-label">Categoria</label>
+                        <select name="{{ form.categoria.name }}" 
+                               id="{{ form.categoria.id_for_label }}" 
+                               class="form-select {% if form.categoria.errors %}is-invalid{% endif %}" required>
+                            <option value="">-- Selecione uma categoria --</option>
+                            {% for categoria in form.categoria.field.queryset %}
+                            <option value="{{ categoria.id }}" {% if form.categoria.value == categoria.id|stringformat:"i" %}selected{% endif %}>
+                                {{ categoria.nome }}
+                                {% if categoria.limite_valor %} (Limite: R$ {{ categoria.limite_valor|floatformat:2 }}){% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        {% if form.categoria.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.categoria.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.descricao.id_for_label }}" class="form-label">Descrição</label>
+                        <textarea name="{{ form.descricao.name }}" 
+                                 id="{{ form.descricao.id_for_label }}" 
+                                 class="form-control {% if form.descricao.errors %}is-invalid{% endif %}"
+                                 rows="4" required>{{ form.descricao.value|default:'' }}</textarea>
+                        {% if form.descricao.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.descricao.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.valor.id_for_label }}" class="form-label">Valor (R$)</label>
+                            <input type="number" name="{{ form.valor.name }}" 
+                                   id="{{ form.valor.id_for_label }}" 
+                                   class="form-control {% if form.valor.errors %}is-invalid{% endif %}"
+                                   value="{{ form.valor.value|default:'' }}" step="0.01" min="0.01" required>
+                            {% if form.valor.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.valor.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.data_despesa.id_for_label }}" class="form-label">Data da Despesa</label>
+                            <input type="date" name="{{ form.data_despesa.name }}" 
+                                   id="{{ form.data_despesa.id_for_label }}" 
+                                   class="form-control {% if form.data_despesa.errors %}is-invalid{% endif %}"
+                                   value="{{ form.data_despesa.value|date:'Y-m-d'|default:'' }}" required>
+                            {% if form.data_despesa.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.data_despesa.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="{{ form.comprovante.id_for_label }}" class="form-label">
+                            Comprovante
+                            {% if form.instance.comprovante %}
+                            <small>(Já existe um comprovante enviado. Envie outro arquivo apenas se quiser substituí-lo.)</small>
+                            {% endif %}
+                        </label>
+                        <input type="file" name="{{ form.comprovante.name }}" 
+                               id="{{ form.comprovante.id_for_label }}" 
+                               class="form-control {% if form.comprovante.errors %}is-invalid{% endif %}">
+                        {% if form.comprovante.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.comprovante.errors.0 }}
+                        </div>
+                        {% endif %}
+                        {% if form.instance.comprovante %}
+                        <div class="form-text">
+                            <a href="{{ form.instance.comprovante.url }}" target="_blank" class="text-decoration-none">
+                                <i class="bi bi-file-earmark"></i> Ver comprovante atual
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'despesas:despesa_list' %}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
