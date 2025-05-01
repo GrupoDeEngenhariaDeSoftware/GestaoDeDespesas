@@ -13,7 +13,7 @@ import tempfile
 import shutil
 from .models import (
     Departamento, Funcionario, CategoriasDespesa, 
-    Despesa, SolicitacaoReembolso, Pagamento, RelatorioFinanceiro
+    Despesa, SolicitacaoReembolso, Pagamento, RelatorioFinanceiro, Reembolso
 )
 from .forms import (
     UserRegistrationForm, FuncionarioForm, DespesaForm, 
@@ -861,3 +861,25 @@ def relatorio_gerar(request):
         'has_result': False
     })
 
+def relatorio_gerar(request):
+    filtro = request.GET.get('filtro', 'todos')  # pega o filtro enviado
+
+    despesas = []
+    reembolsos = []
+
+    if filtro in ['todos', 'despesas']:
+        despesas = Despesa.objects.all()
+    if filtro in ['todos', 'reembolsos']:
+        reembolsos = Reembolso.objects.all()
+
+    total_despesas = sum(d.valor for d in despesas)
+    total_reembolsos = sum(r.valor for r in reembolsos)
+
+    context = {
+        'despesas': despesas,
+        'reembolsos': reembolsos,
+        'total_despesas': total_despesas,
+        'total_reembolsos': total_reembolsos,
+        'filtro': filtro,
+    }
+    return render(request, 'despesas/relatorio_gerar.html', context)

@@ -1,0 +1,37 @@
+{% extends 'despesas/base.html' %}
+
+{% block content %}
+<h1>Relatório Financeiro</h1>
+
+<!-- Botões de filtro -->
+<a href="?filtro=todos">Todos</a> |
+<a href="?filtro=despesas">Somente Despesas</a> |
+<a href="?filtro=reembolsos">Somente Reembolsos</a>
+
+<hr>
+
+{% if filtro == "todos" or filtro == "despesas" %}
+  <h2>Despesas</h2>
+  <ul>
+    {% for despesa in despesas %}
+      <li>{{ despesa.descricao }} — R$ {{ despesa.valor }}</li>
+    {% empty %}
+      <li>Sem despesas registradas.</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+{% if filtro == "todos" or filtro == "reembolsos" %}
+  <h2>Reembolsos</h2>
+  <ul>
+    {% for reembolso in reembolsos %}
+      <li>{{ reembolso.descricao }} — R$ {{ reembolso.valor }}</li>
+    {% empty %}
+      <li>Sem reembolsos registrados.</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+<h3>Total de despesas: R$ {{ total_despesas }}</h3>
+<h3>Total de reembolsos: R$ {{ total_reembolsos }}</h3>
+{% endblock %}

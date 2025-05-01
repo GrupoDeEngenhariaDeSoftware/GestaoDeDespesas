@@ -1,65 +1,44 @@
-
 {% extends 'despesas/base.html' %}
 
-{% block title %}Relatórios - Sistema de Gestão de Despesas{% endblock %}
+{% block title %}Relatório Gerado{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Relatórios Financeiros</h1>
-    <div>
-        <a href="{% url 'despesas:relatorio_create' %}" class="btn btn-primary">
-            Novo Relatório
-        </a>
-        <a href="{% url 'despesas:relatorio_gerar' %}" class="btn btn-success">
-            Gerar Relatório
-        </a>
-    </div>
+<h1>Relatório Financeiro</h1>
+
+<!-- Filtros -->
+<div class="mb-4">
+    <a href="?filtro=todos" class="btn btn-primary">Todos</a>
+    <a href="?filtro=despesas" class="btn btn-secondary">Somente Despesas</a>
+    <a href="?filtro=reembolsos" class="btn btn-secondary">Somente Reembolsos</a>
 </div>
 
-<div class="card">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Título</th>
-                        <th>Tipo</th>
-                        <th>Período</th>
-                        <th>Departamento</th>
-                        <th>Data Criação</th>
-                        <th>Criado Por</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for relatorio in page_obj %}
-                    <tr>
-                        <td>{{ relatorio.titulo }}</td>
-                        <td>{{ relatorio.get_tipo_display }}</td>
-                        <td>{{ relatorio.data_inicio|date:"d/m/Y" }} - {{ relatorio.data_fim|date:"d/m/Y" }}</td>
-                        <td>{{ relatorio.departamento|default:"-" }}</td>
-                        <td>{{ relatorio.data_criacao|date:"d/m/Y H:i" }}</td>
-                        <td>{{ relatorio.criado_por }}</td>
-                        <td>
-                            <a href="{% url 'despesas:relatorio_detail' relatorio.id %}" class="btn btn-info btn-sm">
-                                Detalhes
-                            </a>
-                            {% if relatorio.arquivo %}
-                            <a href="{{ relatorio.arquivo.url }}" class="btn btn-success btn-sm" target="_blank">
-                                Download
-                            </a>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="7" class="text-center">Nenhum relatório encontrado.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% include "despesas/pagination.html" with page_obj=page_obj %}
-    </div>
-</div>
+{% if filtro == "todos" or filtro == "despesas" %}
+<h2>Despesas</h2>
+<ul class="list-group mb-4">
+    {% for despesa in despesas %}
+    <li class="list-group-item">
+        {{ despesa.descricao }} — R$ {{ despesa.valor }}
+    </li>
+    {% empty %}
+    <li class="list-group-item">Nenhuma despesa registrada.</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+{% if filtro == "todos" or filtro == "reembolsos" %}
+<h2>Reembolsos</h2>
+<ul class="list-group mb-4">
+    {% for reembolso in reembolsos %}
+    <li class="list-group-item">
+        {{ reembolso.descricao }} — R$ {{ reembolso.valor }}
+    </li>
+    {% empty %}
+    <li class="list-group-item">Nenhum reembolso registrado.</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+<h3>Total de Despesas: R$ {{ total_despesas }}</h3>
+<h3>Total de Reembolsos: R$ {{ total_reembolsos }}</h3>
+
 {% endblock %}

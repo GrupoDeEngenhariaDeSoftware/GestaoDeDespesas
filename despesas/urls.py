@@ -41,5 +41,6 @@ urlpatterns = [
     path('relatorios/<int:pk>/', views.relatorio_detail, name='relatorio_detail'),
     path('relatorios/gerar/', views.relatorio_gerar, name='relatorio_gerar'),
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
+    path('relatorio/', views.relatorio_gerar, name='relatorio_gerar'),
     
 ]
