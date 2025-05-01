@@ -50,6 +50,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7058ce3158354c708a3101f6202892c67184ca61
 ROOT_URLCONF = 'gestao_despesas.urls'
 
 TEMPLATES = [
